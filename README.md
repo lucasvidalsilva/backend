@@ -1,98 +1,164 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend - Sistema de Quiz
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Tecnologias Utilizadas
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- **NestJS**: Framework para construir aplicações backend escaláveis usando TypeScript. Baseado no Node.js com arquitetura modular e orientada a serviços.
+- **Prisma**: ORM (Object-Relational Mapping) moderno para interagir com bancos de dados usando código TypeScript ao invés de SQL puro.
+- **PostgreSQL (via Supabase)**: Banco de dados relacional robusto e open-source. O Supabase é uma plataforma que fornece uma interface amigável e API pronta sobre o PostgreSQL.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Schema Prisma
 
-## Project setup
+O `schema.prisma` é onde definimos a estrutura do banco de dados, ou seja, as **tabelas** e seus **relacionamentos**.
 
-```bash
-$ npm install
+Dentro dele, usamos **models**, que representam cada tabela do banco. Cada model contém os campos da tabela, com seus respectivos **tipos** (como `String`, `Int`, `DateTime`, etc.) e configurações (como `@id`, `@default`, `@relation`).
+
+### 🧾 Exemplo das Tabelas
+
+<pre><code class="language-prisma">
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
+  password String
+  scores   Score[] @relation("UserScores")
+}
+
+model News {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  fullContent String?
+  source      String
+  url         String?
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  username  String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Questao {
+  id            Int      @id @default(autoincrement())
+  text          String
+  options       String[] 
+  correctAnswer Int
+}
+
+model Score {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  score     Int
+  createdAt DateTime @default(now())
+  user      User     @relation("UserScores", fields: [userId], references: [id])
+}
+</code></pre>
+
+---
+
+## Estrutura em Módulos
+
+O NestJS utiliza uma **arquitetura modular**, onde cada funcionalidade é separada por pastas chamadas **módulos**. Isso facilita a organização, manutenção e reutilização de código.
+
+### Módulos criados no projeto:
+
+- `auth` → Autenticação
+- `user` → Usuário
+- `quiz` → Questões e pontuações
+- `news` → Notícias sobre golpes financeiros
+- `chat` → Bate-papo
+
+---
+
+## Módulo `auth` (Exemplo de Estrutura)
+
+A estrutura dos módulos segue sempre a mesma ideia. Usamos o módulo `auth` como exemplo:
+
+| Arquivo/Função         | Descrição                                                                 |
+|------------------------|---------------------------------------------------------------------------|
+| `auth.controller.ts`   | Define os **endpoints da API** (`/login`, `/register`, etc.)              |
+| `auth.service.ts`      | Lógica de negócio, como verificar senha, gerar token, etc.                |
+| `jwt.guard.ts`         | Middleware que **protege rotas**, verificando se o token JWT é válido     |
+| `dto` (Data Transfer Object) | Define o formato dos dados que entram ou saem (ex: body do login)         |
+
+> **JWT (JSON Web Token)**: Serve para identificar o usuário logado. Usamos nos guards para proteger as rotas privadas.
+
+---
+
+## Integração com API de Notícias
+
+No módulo `news`, usamos a [NewsAPI](https://newsapi.org/) para buscar automaticamente notícias sobre **golpes financeiros** e atualizamos os dados todos os dias com uma tarefa **cron** (agendamento automático).
+
+---
+
+## Representação Gráfica das Tabelas
+
+> Para visualizar o grafo abaixo, é necessário que o seu README seja renderizado com suporte ao **Mermaid.js** (como no GitHub):
+
+```mermaid
+erDiagram
+  User ||--o{ Score : has
+  Score }o--|| User : belongs_to
+
+  News {
+    Int id
+    String title
+    String content
+    String? fullContent
+    String source
+    String? url
+    DateTime createdAt
+  }
+
+  Message {
+    Int id
+    String username
+    String content
+    DateTime createdAt
+  }
+
+  Questao {
+    Int id
+    String text
+    String[] options
+    Int correctAnswer
+  }
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## 📁 Estrutura de Pastas
 
-# watch mode
-$ npm run start:dev
+src/
+│
+├── auth/       # Autenticação (login, register, JWT)
+├── user/       # Dados e ações dos usuários
+├── quiz/       # Questões e pontuação
+├── news/       # Notícias (via API)
+├── chat/       # Chat de mensagens
+│
+├── app.module.ts       # Registra os módulos principais
+├── main.ts             # Arquivo principal (ponto de entrada da API)
+├── prisma/
+│   ├── schema.prisma   # Definição das tabelas do banco de dados
+│   └── prisma.service.ts  # Conexão com o banco via Prisma
 
-# production mode
-$ npm run start:prod
-```
+---
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## RESUMO de conceitos
+|Termo	        | O que é?
+|---------------|-------------------------------------------------------|
+|NestJS	        | Framework backend baseado em módulos                  |
+|ORM	          | Ferramenta para mapear tabelas para objetos de código |
+|Prisma	        | ORM moderno e tipado                                  |
+|schema.prisma	| Arquivo onde criamos as "tabelas" do banco            |
+|model	        | Cada tabela no banco                                  |
+|service	      | Onde fica a lógica principal de um módulo             |
+|controller	    | Define os endpoints que o usuário pode acessar        |
+|guard	        | Protege rotas com autenticação                        | 
+|DTO	          | Define o que pode entrar e sair das requisições       |
+|module	        | Agrupador de controllers, services, DTOs, etc.        |
