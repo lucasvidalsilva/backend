@@ -131,8 +131,6 @@ erDiagram
 
 ## 📁 Estrutura de Pastas
 
-📁 **src/**
-│
 ├── 📂 **auth/**                – Funcionalidades de autenticação  
 │   └── Login, registro, e autenticação via JWT  
 │
