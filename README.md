@@ -97,8 +97,6 @@ No módulo `news`, usamos a [NewsAPI](https://newsapi.org/) para buscar automati
 
 ## Representação Gráfica das Tabelas
 
-> Para visualizar o grafo abaixo, é necessário que o seu README seja renderizado com suporte ao **Mermaid.js** (como no GitHub):
-
 ```mermaid
 erDiagram
   User ||--o{ Score : has
@@ -133,19 +131,30 @@ erDiagram
 
 ## 📁 Estrutura de Pastas
 
-src/
+📁 **src/**
 │
-├── auth/       # Autenticação (login, register, JWT)
-├── user/       # Dados e ações dos usuários
-├── quiz/       # Questões e pontuação
-├── news/       # Notícias (via API)
-├── chat/       # Chat de mensagens
+├── 📂 **auth/** – Funcionalidades de autenticação  
+│   └── Login, registro, e autenticação via JWT
 │
-├── app.module.ts       # Registra os módulos principais
-├── main.ts             # Arquivo principal (ponto de entrada da API)
-├── prisma/
-│   ├── schema.prisma   # Definição das tabelas do banco de dados
-│   └── prisma.service.ts  # Conexão com o banco via Prisma
+├── 📂 **user/** – Gerenciamento de usuários  
+│   └── Dados, perfis e ações dos usuários
+│
+├── 📂 **quiz/** – Lógica do sistema de quiz  
+│   └── Questões, respostas e pontuação
+│
+├── 📂 **news/** – Integração com API de notícias  
+│   └── Exibe notícias relevantes ao usuário
+│
+├── 📂 **chat/** – Funcionalidade de chat em tempo real  
+│   └── Envio e recebimento de mensagens
+│
+├── 📄 **app.module.ts** – Módulo principal que registra todos os outros módulos  
+├── 📄 **main.ts** – Ponto de entrada da aplicação (bootstrap da API)
+│
+📁 **prisma/**
+│
+├── 📄 **schema.prisma** – Definição do schema do banco de dados  
+├── 📄 **prisma.service.ts** – Serviço que conecta o Prisma ao banco de dados
 
 ---
 
