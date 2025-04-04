@@ -106,9 +106,9 @@ erDiagram
     Int id
     String title
     String content
-    String? fullContent
+    String fullContent
     String source
-    String? url
+    String url
     DateTime createdAt
   }
 
@@ -122,7 +122,7 @@ erDiagram
   Questao {
     Int id
     String text
-    String[] options
+    String options
     Int correctAnswer
   }
 ```
