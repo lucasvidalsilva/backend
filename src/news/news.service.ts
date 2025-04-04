@@ -10,7 +10,7 @@ export class NewsService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  @Cron(CronExpression.EVERY_HOUR, { name: 'fetchAndSaveNewsCron' })
+  @Cron(CronExpression.EVERY_DAY_AT_10PM, { name: 'fetchAndSaveNewsCron' })
   async fetchAndSaveNews() {
     try {
       const response = await axios.get(this.url, {
@@ -53,7 +53,7 @@ export class NewsService {
           });
         }
       }
-      console.log('News fetched and saved successfully.');
+      console.log('noticias pesquisadas e salvadas.');
     } catch (error) {
       console.error('Error fetching and saving news:', {
         message: error.message,

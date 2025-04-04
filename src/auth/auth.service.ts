@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+    private deathNoteTokens: Set<string> = new Set();
     constructor(private userService: UserService, 
         private jwtService:JwtService
         ) {}
@@ -13,10 +14,9 @@ export class AuthService {
     async login(dto:LoginDto){
         const user = await this.validateUser(dto);
         const payload ={
-            username:user.email,
-            sub:{
-                name:user.name,
-            },
+            sub:user.id,
+            email:user.email,
+            name:user.name,
         };
 
         return {
@@ -44,4 +44,14 @@ export class AuthService {
         }
         throw new UnauthorizedException();
     }
+
+    async logout(token: string) {
+        this.deathNoteTokens.add(token);
+        return true;
+    }
+
+    isTokenDeathNote(token: string): boolean {
+        return this.deathNoteTokens.has(token);
+    }
+    
 }

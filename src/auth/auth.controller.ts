@@ -21,4 +21,11 @@ export class AuthController {
     async login(@Body() dto:LoginDto){
         return await this.authService.login(dto);
     }
+
+    @Post('logout')
+    async logout(@Body() req) {
+        const token = req.headers.authorization?.split(' ')[1];
+        await this.authService.logout(token);
+        return { message: 'Logout realizado fih'};
+    }
 }

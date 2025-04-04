@@ -10,10 +10,22 @@ export class QuizService {
   }
 
   async saveScore(userId: number, score: number) {
-    return this.prisma.score.create({
-      data: {
+    return this.prisma.score.upsert({
+      where: {
+        userId,
+      },
+      update: {
+        score,
+        createdAt: new Date(),
+      },
+      create: {
         userId,
         score,
+      },
+      include: {
+        user: {
+          select: { name: true },
+        },
       },
     });
   }

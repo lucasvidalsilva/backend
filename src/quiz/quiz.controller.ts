@@ -11,15 +11,14 @@ export class QuizController {
   async getQuestions() {
     return this.quizService.getQuestions();
   }
-
+  
   @UseGuards(JwtGuard)
   @Post('score')
   async saveScore(@Req() request: AuthenticatedRequest, @Body('score') score: number) {
-    console.log("Usuário autenticado:", request.user);
     if (!request.user) {
       throw new Error('Usuário não autenticado');
     }
-    return this.quizService.saveScore(request.user.id, score);
+    return this.quizService.saveScore(request.user.sub, score);
   }
 
   @Get('ranking')
