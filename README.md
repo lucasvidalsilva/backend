@@ -99,8 +99,8 @@ No módulo `news`, usamos a [NewsAPI](https://newsapi.org/) para buscar automati
 
 ```mermaid
 erDiagram
-  User ||--o{ Score : has
-  Score }o--|| User : belongs_to
+  User ||--o{ Score : userId
+  Score }o--|| User : id
 
   News {
     Int id
