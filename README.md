@@ -133,28 +133,29 @@ erDiagram
 
 📁 **src/**
 │
-├── 📂 **auth/** – Funcionalidades de autenticação  
-│   └── Login, registro, e autenticação via JWT
+├── 📂 **auth/**                – Funcionalidades de autenticação  
+│   └── Login, registro, e autenticação via JWT  
 │
-├── 📂 **user/** – Gerenciamento de usuários  
-│   └── Dados, perfis e ações dos usuários
+├── 📂 **user/**                – Gerenciamento de usuários  
+│   └── Dados, perfis e ações dos usuários  
 │
-├── 📂 **quiz/** – Lógica do sistema de quiz  
-│   └── Questões, respostas e pontuação
+├── 📂 **quiz/**                – Lógica do sistema de quiz  
+│   └── Questões, respostas e pontuação  
 │
-├── 📂 **news/** – Integração com API de notícias  
-│   └── Exibe notícias relevantes ao usuário
+├── 📂 **news/**                – Integração com API de notícias  
+│   └── Exibe notícias relevantes ao usuário  
 │
-├── 📂 **chat/** – Funcionalidade de chat em tempo real  
-│   └── Envio e recebimento de mensagens
+├── 📂 **chat/**                – Funcionalidade de chat em tempo real  
+│   └── Envio e recebimento de mensagens  
 │
-├── 📄 **app.module.ts** – Módulo principal que registra todos os outros módulos  
-├── 📄 **main.ts** – Ponto de entrada da aplicação (bootstrap da API)
+├── 📄 **app.module.ts**        – Módulo principal que registra todos os outros módulos  
+├── 📄 **main.ts**              – Ponto de entrada da aplicação (bootstrap da API)  
 │
 📁 **prisma/**
 │
-├── 📄 **schema.prisma** – Definição do schema do banco de dados  
-├── 📄 **prisma.service.ts** – Serviço que conecta o Prisma ao banco de dados
+├── 📄 **schema.prisma**        – Definição do schema do banco de dados  
+├── 📄 **prisma.service.ts**    – Serviço que conecta o Prisma ao banco de dados  
+
 
 ---
 
