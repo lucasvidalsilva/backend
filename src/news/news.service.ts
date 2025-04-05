@@ -15,7 +15,7 @@ export class NewsService {
     try {
       const response = await axios.get(this.url, {
         params: {
-          q: 'golpes-financeiros',
+          q: 'golpes financeiros, fraudes bancárias, estelionato digital, phishing, golpe do pix, fraudes em aplicativos, roubo de dados bancários, golpistas online, segurança financeira digital',
           apiKey: this.apiKey,
           pageSize: 10,
         },
