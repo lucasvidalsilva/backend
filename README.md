@@ -1,4 +1,6 @@
-# Backend - Sistema de Quiz
+# Backend do site CoopSeg
+
+<img src="img-coopseg.png">
 
 ## Tecnologias Utilizadas
 
