@@ -1,174 +1,81 @@
-# Backend do site CoopSeg
+# CoopSeg Backend
 
-<img src="img-coopseg.png">
+API NestJS para uma aplicação educativa sobre golpes financeiros. O repositório implementa cadastro e login, quiz e ranking, notícias agendadas e um mural de mensagens persistido com Prisma/PostgreSQL.
 
-## Tecnologias Utilizadas
+**Estado:** protótipo em desenvolvimento. Os módulos e migrations existem, mas a autenticação possui inconsistências conhecidas, a cobertura automatizada é apenas o teste e2e padrão e não há configuração de ambiente de exemplo.
 
-- **NestJS**: Framework para construir aplicações backend escaláveis usando TypeScript. Baseado no Node.js com arquitetura modular e orientada a serviços.
-- **Prisma**: ORM (Object-Relational Mapping) moderno para interagir com bancos de dados usando código TypeScript ao invés de SQL puro.
-- **PostgreSQL (via Supabase)**: Banco de dados relacional robusto e open-source. O Supabase é uma plataforma que fornece uma interface amigável e API pronta sobre o PostgreSQL.
-
----
-
-## Schema Prisma
-
-O `schema.prisma` é onde definimos a estrutura do banco de dados, ou seja, as **tabelas** e seus **relacionamentos**.
-
-Dentro dele, usamos **models**, que representam cada tabela do banco. Cada model contém os campos da tabela, com seus respectivos **tipos** (como `String`, `Int`, `DateTime`, etc.) e configurações (como `@id`, `@default`, `@relation`).
-
-### 🧾 Exemplo das Tabelas
-
-<pre><code class="language-prisma">
-model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String?
-  password String
-  scores   Score[] @relation("UserScores")
-}
-
-model News {
-  id          Int      @id @default(autoincrement())
-  title       String
-  content     String
-  fullContent String?
-  source      String
-  url         String?
-  createdAt   DateTime @default(now())
-}
-
-model Message {
-  id        Int      @id @default(autoincrement())
-  username  String
-  content   String
-  createdAt DateTime @default(now())
-}
-
-model Questao {
-  id            Int      @id @default(autoincrement())
-  text          String
-  options       String[] 
-  correctAnswer Int
-}
-
-model Score {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-  score     Int
-  createdAt DateTime @default(now())
-  user      User     @relation("UserScores", fields: [userId], references: [id])
-}
-</code></pre>
-
----
-
-## Estrutura em Módulos
-
-O NestJS utiliza uma **arquitetura modular**, onde cada funcionalidade é separada por pastas chamadas **módulos**. Isso facilita a organização, manutenção e reutilização de código.
-
-### Módulos criados no projeto:
-
-- `auth` → Autenticação
-- `user` → Usuário
-- `quiz` → Questões e pontuações
-- `news` → Notícias sobre golpes financeiros
-- `chat` → Bate-papo
-
----
-
-## Módulo `auth` (Exemplo de Estrutura)
-
-A estrutura dos módulos segue sempre a mesma ideia. Usamos o módulo `auth` como exemplo:
-
-| Arquivo/Função         | Descrição                                                                 |
-|------------------------|---------------------------------------------------------------------------|
-| `auth.controller.ts`   | Define os **endpoints da API** (`/login`, `/register`, etc.)              |
-| `auth.service.ts`      | Lógica de negócio, como verificar senha, gerar token, etc.                |
-| `jwt.guard.ts`         | Middleware que **protege rotas**, verificando se o token JWT é válido     |
-| `dto` (Data Transfer Object) | Define o formato dos dados que entram ou saem (ex: body do login)         |
-
-> **JWT (JSON Web Token)**: Serve para identificar o usuário logado. Usamos nos guards para proteger as rotas privadas.
-
----
-
-## Integração com API de Notícias
-
-No módulo `news`, usamos a [NewsAPI](https://newsapi.org/) para buscar automaticamente notícias sobre **golpes financeiros** e atualizamos os dados todos os dias com uma tarefa **cron** (agendamento automático).
-
----
-
-## Representação Gráfica das Tabelas
+## Arquitetura
 
 ```mermaid
-erDiagram
-  User ||--o{ Score : userId
-  Score }o--|| User : id
-
-  News {
-    Int id
-    String title
-    String content
-    String fullContent
-    String source
-    String url
-    DateTime createdAt
-  }
-
-  Message {
-    Int id
-    String username
-    String content
-    DateTime createdAt
-  }
-
-  Questao {
-    Int id
-    String text
-    String options
-    Int correctAnswer
-  }
+flowchart LR
+    CLIENT["cliente web"] --> API["NestJS · porta 5005"]
+    API --> PRISMA["Prisma"]
+    PRISMA --> PG["PostgreSQL/Supabase"]
+    NEWS["NewsAPI"] --> CRON["cron diário"]
+    CRON --> API
 ```
 
----
+## Endpoints observados
 
-## 📁 Estrutura de Pastas
-📂**src/**\
-├── 📂 **auth/**                – Funcionalidades de autenticação  
-│   └── Login, registro, e autenticação via JWT  
-│
-├── 📂 **user/**                – Gerenciamento de usuários  
-│   └── Dados, perfis e ações dos usuários  
-│
-├── 📂 **quiz/**                – Lógica do sistema de quiz  
-│   └── Questões, respostas e pontuação  
-│
-├── 📂 **news/**                – Integração com API de notícias  
-│   └── Exibe notícias relevantes ao usuário  
-│
-├── 📂 **chat/**                – Funcionalidade de chat em tempo real  
-│   └── Envio e recebimento de mensagens  
-│
-├── 📄 **app.module.ts**        – Módulo principal que registra todos os outros módulos  
-├── 📄 **main.ts**              – Ponto de entrada da aplicação (bootstrap da API)  
-│
-📁 **prisma/**
-│
-├── 📄 **schema.prisma**        – Definição do schema do banco de dados  
-├── 📄 **prisma.service.ts**    – Serviço que conecta o Prisma ao banco de dados  
+| Método e rota | Função | Proteção atual |
+| --- | --- | --- |
+| `POST /auth/register` | cadastra usuário com hash bcrypt | pública |
+| `POST /auth/login` | retorna access e refresh tokens | pública |
+| `POST /auth/logout` | tenta invalidar token em memória | pública e incompleta |
+| `GET /user/:id` | nome e ID do usuário | pública |
+| `GET /news` | notícias persistidas | pública |
+| `POST /chat/send` | cria mensagem | pública |
+| `GET /chat/messages` | lista mensagens | pública |
+| `GET /quiz/questions` | lista questões | pública |
+| `POST /quiz/score` | salva pontuação | JWT |
+| `GET /quiz/ranking` | top 3 | pública |
 
+## Configuração
 
----
+Crie um `.env` local:
 
-## RESUMO de conceitos
-|Termo	        | O que é?
-|---------------|-------------------------------------------------------|
-|NestJS	        | Framework backend baseado em módulos                  |
-|ORM	          | Ferramenta para mapear tabelas para objetos de código |
-|Prisma	        | ORM moderno e tipado                                  |
-|schema.prisma	| Arquivo onde criamos as "tabelas" do banco            |
-|model	        | Cada tabela no banco                                  |
-|service	      | Onde fica a lógica principal de um módulo             |
-|controller	    | Define os endpoints que o usuário pode acessar        |
-|guard	        | Protege rotas com autenticação                        | 
-|DTO	          | Define o que pode entrar e sair das requisições       |
-|module	        | Agrupador de controllers, services, DTOs, etc.        |
+```dotenv
+DATABASE_URL=postgresql://usuario:senha@host:5432/banco
+JWT_SECRET_KEY=troque_por_um_segredo_forte
+JWT_REFRESH_TOKEN_KEY=troque_por_outro_segredo_forte
+API_KEY_NEWS=sua_chave
+```
+
+O código atualmente mistura `JWT_SECRET_KEY` com `jwtSecretKey` e `jwtRefreshTokenKey`. Essa inconsistência precisa ser corrigida antes de considerar login e proteção de rotas funcionais.
+
+## Executar
+
+Pré-requisitos: Node.js, npm e PostgreSQL acessível.
+
+```bash
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm run start:dev
+```
+
+A API escuta `http://localhost:5005` e aceita CORS somente de `http://localhost:3000`.
+
+## Verificações disponíveis
+
+```bash
+npm run build
+npm run lint
+npm test
+npm run test:e2e
+```
+
+A auditoria atual verificou apenas a sintaxe dos arquivos Python inexistentes/não aplicáveis e inspecionou o TypeScript; Node.js não estava instalado no ambiente, portanto build, lint e Jest não foram executados.
+
+## Limitações e riscos
+
+- o logout lê headers a partir do body, mantém uma lista somente em memória e o guard não consulta essa lista;
+- refresh token é emitido, mas não há endpoint de renovação;
+- apenas `POST /quiz/score` usa `JwtGuard`;
+- o teste e2e cobre apenas `GET /` com “Hello World”;
+- mensagens e notícias não têm paginação nem limites de conteúdo defensivos completos;
+- a entidade `Score` permite apenas uma pontuação por usuário;
+- faltam rate limiting, documentação OpenAPI, healthcheck e CI;
+- usar PostgreSQL hospedado no Supabase via Prisma não equivale a usar Supabase Auth ou RLS.
+
+Antes de um deploy, priorize corrigir a configuração JWT, definir autorização por rota, testar autenticação e adicionar uma política explícita de retenção para mensagens e usuários.
